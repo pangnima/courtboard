@@ -4,7 +4,9 @@ import { supabase } from './lib/supabase'
 import type { Court } from './types'
 import AdminLogin from './components/AdminLogin'
 import CourtForm from './components/CourtForm'
+import AdminNewCourts from './components/AdminNewCourts'
 import CourtList from './components/CourtList'
+import RecentCourts from './components/RecentCourts'
 export default function App() {
   const [courts, setCourts] = useState<Court[]>([])
   const [loading, setLoading] = useState(true)
@@ -50,10 +52,14 @@ export default function App() {
           <AdminLogin session={session} isAdmin={isAdmin} />
         </header>
 
+        {isAdmin && !loading && <AdminNewCourts courts={courts} onChanged={loadCourts} />}
+
         <section className="grid gap-2">
           <h2 className="font-semibold">코트 등록</h2>
           <CourtForm onCreated={loadCourts} />
         </section>
+
+        {!loading && <RecentCourts courts={courts} />}
 
         <section className="grid gap-2">
           <h2 className="font-semibold">코트 목록</h2>
