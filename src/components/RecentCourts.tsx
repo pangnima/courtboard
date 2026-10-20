@@ -1,4 +1,4 @@
-import { hhmm, isRecent, STATUS_STYLES } from '../lib/court'
+import { DONE_BADGE, hhmm, isRecent, STATUS_STYLES } from '../lib/court'
 import { formatDateLabel, formatDateTime, timeAgo } from '../lib/date'
 import type { Court } from '../types'
 
@@ -19,8 +19,12 @@ export default function RecentCourts({ courts }: { courts: Court[] }) {
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {recent.map((court) => {
             const failed = court.transfer_failed
+            const done = court.completed
             return (
-              <li key={court.id} className="grid gap-1 rounded-lg border border-sky-200 bg-white p-3 shadow-sm">
+              <li
+                key={court.id}
+                className={`grid gap-1 rounded-lg border p-3 shadow-sm ${done ? 'border-emerald-300 bg-emerald-50' : 'border-sky-200 bg-white'}`}
+              >
                 <div className="flex items-center justify-between gap-2">
                   <span className={`font-bold ${failed ? 'text-gray-400 line-through decoration-red-400' : ''}`}>
                     {formatDateLabel(court.play_date)}{' '}
@@ -36,8 +40,9 @@ export default function RecentCourts({ courts }: { courts: Court[] }) {
                     </span>
                   )}
                 </div>
-                <p className={`font-medium ${failed ? 'text-gray-400 line-through decoration-red-400' : ''}`}>
+                <p className={`flex items-center gap-1.5 font-medium ${failed ? 'text-gray-400 line-through decoration-red-400' : ''}`}>
                   {court.court_name} · {court.court_number}
+                  {done && <span className={DONE_BADGE}>완료</span>}
                 </p>
                 <p className="flex justify-between text-sm text-gray-600">
                   <span>예약자 {court.reserver_name}</span>

@@ -9,6 +9,9 @@ export const STATUS_STYLES: Record<RecruitStatus, string> = {
   인증코트: 'bg-purple-100 text-purple-800',
 }
 
+// 완료(외부에서 확정) 일정의 코트 이름 옆 배지
+export const DONE_BADGE = 'shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-bold text-white no-underline'
+
 // 이 기능 도입 시점에 이미 있던 일정(40건)을 '최근 등록'에서 빼기 위한 기준 시각.
 // 2026-10-21 오후 이후에는 24시간 조건만으로 충분하므로 제거해도 된다.
 const RECENT_SINCE = Date.parse('2026-10-20T04:05:57Z')

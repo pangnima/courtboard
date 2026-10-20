@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { hhmm, isPast, STATUS_STYLES } from '../lib/court'
+import { DONE_BADGE, hhmm, isPast, STATUS_STYLES } from '../lib/court'
 import { formatDateLabel, nowTime, today } from '../lib/date'
 import { supabase } from '../lib/supabase'
 import type { Court } from '../types'
@@ -33,7 +33,7 @@ function Columns({ isAdmin }: { isAdmin: boolean }) {
       <col className="w-24" />
       <col className="w-28" />
       <col className="w-28" />
-      {isAdmin && <col className="w-44" />}
+      {isAdmin && <col className="w-56" />}
     </colgroup>
   )
 }
@@ -59,7 +59,21 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
     if (!confirm(failed ? `${label} 일정을 양도 실패로 표시할까요?` : `${label} 일정의 양도 실패를 취소할까요?`)) return
 
     // 삭제와 마찬가지로 권한이 없으면 error 없이 0행이 바뀌므로 결과 행을 확인
-    const { data, error } = await supabase.from('courts').update({ transfer_failed: failed }).eq('id', court.id).select()
+    // 완료와 양도 실패는 동시에 표시할 수 없으므로 실패 표시 시 완료를 해제
+    const changes = failed ? { transfer_failed: true, completed: false } : { transfer_failed: false }
+    const { data, error } = await supabase.from('courts').update(changes).eq('id', court.id).select()
+    if (error) return alert(`변경 실패: ${error.message}`)
+    if (!data.length) return alert('변경 권한이 없습니다.')
+    onChanged()
+  }
+
+  async function toggleCompleted(court: Court) {
+    const completed = !court.completed
+    const label = `'${court.court_name} ${court.court_number}' (${court.play_date})`
+    if (!confirm(completed ? `${label} 일정을 완료로 표시할까요?` : `${label} 일정의 완료를 취소할까요?`)) return
+
+    const changes = completed ? { completed: true, transfer_failed: false } : { completed: false }
+    const { data, error } = await supabase.from('courts').update(changes).eq('id', court.id).select()
     if (error) return alert(`변경 실패: ${error.message}`)
     if (!data.length) return alert('변경 권한이 없습니다.')
     onChanged()
@@ -132,20 +146,28 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
               const editing = editingId === court.id
               const past = isPast(court, currentDate, currentTime)
               const isFailed = court.transfer_failed
+              const isDone = court.completed
+              // 완료는 흐리게 하지 않고 배경색으로 구분 (메모 행까지 같은 색)
+              const rowBg = isDone ? 'bg-emerald-50' : ''
               const rowClass = isFailed
                 ? 'text-gray-400 line-through decoration-red-400'
-                : past
-                  ? 'text-gray-400'
-                  : 'text-gray-900'
+                : isDone
+                  ? 'text-gray-900'
+                  : past
+                    ? 'text-gray-400'
+                    : 'text-gray-900'
               const divider = index > 0 ? 'border-t border-gray-200' : ''
               return (
                 <Fragment key={court.id}>
-                  <tr className={`${divider} ${rowClass}`}>
+                  <tr className={`${divider} ${rowBg} ${rowClass}`}>
                     <td className="px-4 py-3 font-semibold tabular-nums">
                       {hhmm(court.start_time)} ~ {hhmm(court.end_time)}
                     </td>
-                    <td className="truncate px-4 py-3 font-medium" title={court.court_name}>
-                      {court.court_name}
+                    <td className="px-4 py-3 font-medium" title={court.court_name}>
+                      <span className="flex items-center gap-1.5">
+                        <span className="truncate">{court.court_name}</span>
+                        {isDone && <span className={DONE_BADGE}>완료</span>}
+                      </span>
                     </td>
                     <td className="truncate px-4 py-3">{court.court_number}</td>
                     <td className="truncate px-4 py-3">{court.reserver_name}</td>
@@ -166,6 +188,12 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
                     {isAdmin && (
                       <td className="px-4 py-3 text-right text-sm">
                         <button
+                          onClick={() => toggleCompleted(court)}
+                          className={`mr-3 hover:underline ${isDone ? 'text-blue-600' : 'text-emerald-700'}`}
+                        >
+                          {isDone ? '완료취소' : '완료'}
+                        </button>
+                        <button
                           onClick={() => toggleTransferFailed(court)}
                           className={`mr-3 hover:underline ${isFailed ? 'text-blue-600' : 'text-amber-700'}`}
                         >
@@ -181,7 +209,7 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
                     )}
                   </tr>
                   {editing ? (
-                    <tr>
+                    <tr className={rowBg}>
                       <td colSpan={columnCount} className="whitespace-normal px-4 pb-4">
                         <div className="grid gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3">
                           <label htmlFor={`memo-${court.id}`} className="text-xs font-medium text-gray-600">
@@ -222,7 +250,7 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
                     </tr>
                   ) : (
                     memo && (
-                      <tr>
+                      <tr className={rowBg}>
                         <td colSpan={columnCount} className="whitespace-normal px-4 pb-3">
                           <p className="rounded-md bg-gray-50 px-3 py-2 text-[13px] text-gray-600">📝 {memo}</p>
                         </td>
@@ -255,7 +283,7 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
   return (
     // 좁은 화면에서는 줄바꿈 대신 머리글과 카드가 함께 가로 스크롤
     <div className="overflow-x-auto">
-      <div className="grid min-w-[720px] gap-4 whitespace-nowrap text-[15px]">
+      <div className={`grid gap-4 whitespace-nowrap text-[15px] ${isAdmin ? 'min-w-[920px]' : 'min-w-[720px]'}`}>
         <table className="w-full table-fixed text-left text-[13px] text-gray-500">
           <Columns isAdmin={isAdmin} />
           <thead>

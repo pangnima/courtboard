@@ -13,9 +13,13 @@ export type Court = {
   end_time: string
   price: number
   transfer_failed: boolean
+  completed: boolean // 외부에서 확정된 일정
   admin_checked_at: string | null // null = 관리자 미확인
   created_at: string
   court_notes: { memo: string } | null
 }
 
-export type NewCourt = Omit<Court, 'id' | 'created_at' | 'court_notes' | 'transfer_failed' | 'admin_checked_at'>
+export type NewCourt = Omit<
+  Court,
+  'id' | 'created_at' | 'court_notes' | 'transfer_failed' | 'completed' | 'admin_checked_at'
+>
