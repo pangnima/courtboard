@@ -10,6 +10,7 @@ create table public.courts (
   start_time     time not null,
   end_time       time not null, -- 클라이언트가 시작 + 2시간으로 저장
   price          integer not null check (price >= 0),
+  transfer_failed boolean not null default false, -- 관리자만 변경
   created_at     timestamptz not null default now(),
   check (end_time > start_time),
   constraint courts_start_on_the_hour
@@ -43,10 +44,15 @@ alter table public.admins enable row level security; -- 정책 없음 = 클라�
 create policy "누구나 조회" on public.courts
   for select to anon, authenticated using (true);
 create policy "누구나 등록" on public.courts
-  for insert to anon, authenticated with check (true);
+  for insert to anon, authenticated with check (transfer_failed = false);
 create policy "관리자만 삭제" on public.courts
   for delete to authenticated using ((select public.is_admin()));
--- courts는 update 정책 없음 = 수정 불가
+
+-- 수정은 관리자의 양도 실패 표시만 허용 (다른 컬럼은 수정 불가)
+revoke update on public.courts from anon, authenticated;
+grant update (transfer_failed) on public.courts to authenticated;
+create policy "관리자만 양도실패 표시" on public.courts
+  for update to authenticated using ((select public.is_admin())) with check ((select public.is_admin()));
 
 create policy "누구나 메모 조회" on public.court_notes
   for select to anon, authenticated using (true);

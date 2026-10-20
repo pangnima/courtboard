@@ -5,8 +5,6 @@ import type { Court } from './types'
 import AdminLogin from './components/AdminLogin'
 import CourtForm from './components/CourtForm'
 import CourtList from './components/CourtList'
-import TodayCourts from './components/TodayCourts'
-
 export default function App() {
   const [courts, setCourts] = useState<Court[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,8 +54,6 @@ export default function App() {
           <h2 className="font-semibold">코트 등록</h2>
           <CourtForm onCreated={loadCourts} />
         </section>
-
-        {!loading && <TodayCourts courts={courts} />}
 
         <section className="grid gap-2">
           <h2 className="font-semibold">코트 목록</h2>

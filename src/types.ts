@@ -12,8 +12,9 @@ export type Court = {
   start_time: string // HH:MM:SS
   end_time: string
   price: number
+  transfer_failed: boolean
   created_at: string
   court_notes: { memo: string } | null
 }
 
-export type NewCourt = Omit<Court, 'id' | 'created_at' | 'court_notes'>
+export type NewCourt = Omit<Court, 'id' | 'created_at' | 'court_notes' | 'transfer_failed'>
