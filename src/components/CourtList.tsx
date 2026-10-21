@@ -2,7 +2,7 @@ import { Fragment, useState } from 'react'
 import { DONE_BADGE, hhmm, isPast, STATUS_STYLES } from '../lib/court'
 import { formatDateLabel, nowTime, today } from '../lib/date'
 import { supabase } from '../lib/supabase'
-import type { Court } from '../types'
+import { RECRUIT_STATUSES, type Court, type RecruitStatus } from '../types'
 
 type Props = {
   courts: Court[]
@@ -74,6 +74,13 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
 
     const changes = completed ? { completed: true, transfer_failed: false } : { completed: false }
     const { data, error } = await supabase.from('courts').update(changes).eq('id', court.id).select()
+    if (error) return alert(`변경 실패: ${error.message}`)
+    if (!data.length) return alert('변경 권한이 없습니다.')
+    onChanged()
+  }
+
+  async function changeStatus(court: Court, recruit_status: RecruitStatus) {
+    const { data, error } = await supabase.from('courts').update({ recruit_status }).eq('id', court.id).select()
     if (error) return alert(`변경 실패: ${error.message}`)
     if (!data.length) return alert('변경 권한이 없습니다.')
     onChanged()
@@ -178,6 +185,19 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
                         </span>
                       ) : past ? (
                         <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-500">마감</span>
+                      ) : isAdmin ? (
+                        <select
+                          aria-label="모집 상태"
+                          value={court.recruit_status}
+                          onChange={(e) => changeStatus(court, e.target.value as RecruitStatus)}
+                          className={`max-w-full cursor-pointer rounded-full px-1.5 py-1 text-xs font-semibold ${STATUS_STYLES[court.recruit_status]}`}
+                        >
+                          {RECRUIT_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {status}
+                            </option>
+                          ))}
+                        </select>
                       ) : (
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${STATUS_STYLES[court.recruit_status]}`}>
                           {court.recruit_status}

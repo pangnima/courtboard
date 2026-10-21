@@ -51,9 +51,9 @@ create policy "누구나 등록" on public.courts
 create policy "관리자만 삭제" on public.courts
   for delete to authenticated using ((select public.is_admin()));
 
--- 수정은 관리자의 양도 실패/완료 표시, 새 일정 확인만 허용 (다른 컬럼은 수정 불가)
+-- 수정은 관리자의 양도 실패/완료 표시, 새 일정 확인, 모집 상태 변경만 허용 (다른 컬럼은 수정 불가)
 revoke update on public.courts from anon, authenticated;
-grant update (transfer_failed, completed, admin_checked_at) on public.courts to authenticated;
+grant update (transfer_failed, completed, admin_checked_at, recruit_status) on public.courts to authenticated;
 create policy "관리자만 상태 변경" on public.courts
   for update to authenticated using ((select public.is_admin())) with check ((select public.is_admin()));
 
