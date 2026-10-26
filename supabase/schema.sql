@@ -12,6 +12,7 @@ create table public.courts (
   price          integer not null check (price >= 0),
   transfer_failed boolean not null default false, -- 관리자만 변경
   completed      boolean not null default false,  -- 외부에서 확정된 일정, 관리자만 변경
+  cancel_fee     boolean not null default false,  -- 취소수수료 발생 (금액은 클라이언트가 이용금액 × 요율로 계산), 관리자만 변경
   admin_checked_at timestamptz,                   -- 관리자 확인 시각 (null = 미확인), 관리자만 변경
   created_at     timestamptz not null default now(),
   check (end_time > start_time),
@@ -47,13 +48,13 @@ alter table public.admins enable row level security; -- 정책 없음 = 클라�
 create policy "누구나 조회" on public.courts
   for select to anon, authenticated using (true);
 create policy "누구나 등록" on public.courts
-  for insert to anon, authenticated with check (transfer_failed = false and completed = false and admin_checked_at is null);
+  for insert to anon, authenticated with check (transfer_failed = false and completed = false and cancel_fee = false and admin_checked_at is null);
 create policy "관리자만 삭제" on public.courts
   for delete to authenticated using ((select public.is_admin()));
 
--- 수정은 관리자의 양도 실패/완료 표시, 새 일정 확인, 모집 상태 변경만 허용 (다른 컬럼은 수정 불가)
+-- 수정은 관리자의 양도 실패/완료/취소수수료 표시, 새 일정 확인, 모집 상태 변경만 허용 (다른 컬럼은 수정 불가)
 revoke update on public.courts from anon, authenticated;
-grant update (transfer_failed, completed, admin_checked_at, recruit_status) on public.courts to authenticated;
+grant update (transfer_failed, completed, cancel_fee, admin_checked_at, recruit_status) on public.courts to authenticated;
 create policy "관리자만 상태 변경" on public.courts
   for update to authenticated using ((select public.is_admin())) with check ((select public.is_admin()));
 

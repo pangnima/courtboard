@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { resolveDate, weekday } from '../lib/date'
 import { supabase } from '../lib/supabase'
-import { RECRUIT_STATUSES, type NewCourt, type RecruitStatus } from '../types'
+import { COURT_NAMES, RECRUIT_STATUSES, type NewCourt, type RecruitStatus } from '../types'
 
 const DEFAULT_PLAY_HOURS = 2
 const LAST_END_HOUR = 24
@@ -144,7 +144,12 @@ export default function CourtForm({ onCreated }: { onCreated: () => void }) {
       </label>
       <label className="grid gap-1 text-sm">
         코트 이름
-        <input className={inputClass} required maxLength={50} value={form.court_name} onChange={set('court_name')} />
+        <select className={inputClass} required value={form.court_name} onChange={set('court_name')}>
+          <option value="">선택</option>
+          {COURT_NAMES.map((name) => (
+            <option key={name}>{name}</option>
+          ))}
+        </select>
       </label>
       <label className="grid gap-1 text-sm">
         코트 번호

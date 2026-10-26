@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js'
 import { supabase } from './lib/supabase'
 import type { Court } from './types'
 import AdminLogin from './components/AdminLogin'
+import CancelFeeSummary from './components/CancelFeeSummary'
 import CourtForm from './components/CourtForm'
 import AdminNewCourts from './components/AdminNewCourts'
 import CourtList from './components/CourtList'
@@ -70,6 +71,8 @@ export default function App() {
             <CourtList courts={courts} isAdmin={isAdmin} onChanged={loadCourts} />
           )}
         </section>
+
+        {!loading && <CancelFeeSummary courts={courts} />}
       </main>
     </div>
   )

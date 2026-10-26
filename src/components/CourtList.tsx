@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react'
-import { DONE_BADGE, hhmm, isPast, STATUS_STYLES } from '../lib/court'
+import { cancelFee, DONE_BADGE, hhmm, isPast, STATUS_STYLES } from '../lib/court'
 import { formatDateLabel, nowTime, today } from '../lib/date'
 import { supabase } from '../lib/supabase'
 import { RECRUIT_STATUSES, type Court, type RecruitStatus } from '../types'
@@ -33,7 +33,7 @@ function Columns({ isAdmin }: { isAdmin: boolean }) {
       <col className="w-24" />
       <col className="w-28" />
       <col className="w-28" />
-      {isAdmin && <col className="w-56" />}
+      {isAdmin && <col className="w-72" />}
     </colgroup>
   )
 }
@@ -74,6 +74,17 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
 
     const changes = completed ? { completed: true, transfer_failed: false } : { completed: false }
     const { data, error } = await supabase.from('courts').update(changes).eq('id', court.id).select()
+    if (error) return alert(`변경 실패: ${error.message}`)
+    if (!data.length) return alert('변경 권한이 없습니다.')
+    onChanged()
+  }
+
+  async function toggleCancelFee(court: Court) {
+    const charged = !court.cancel_fee
+    const label = `'${court.court_name} ${court.court_number}' (${court.play_date})`
+    if (!confirm(charged ? `${label} 일정을 취소수수료 발생으로 표시할까요?` : `${label} 일정의 취소수수료를 해제할까요?`)) return
+
+    const { data, error } = await supabase.from('courts').update({ cancel_fee: charged }).eq('id', court.id).select()
     if (error) return alert(`변경 실패: ${error.message}`)
     if (!data.length) return alert('변경 권한이 없습니다.')
     onChanged()
@@ -204,9 +215,28 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-right tabular-nums">{court.price.toLocaleString()}원</td>
+                    <td className="px-4 py-3 text-right tabular-nums">
+                      {court.price.toLocaleString()}원
+                      {court.cancel_fee && (
+                        // 양도 실패 행의 취소선이 번지지 않도록 inline-block으로 감싼다
+                        <span className="block">
+                          <span className="inline-block text-xs font-semibold text-red-600">
+                            수수료 {cancelFee(court).toLocaleString()}원
+                          </span>
+                        </span>
+                      )}
+                    </td>
                     {isAdmin && (
                       <td className="px-4 py-3 text-right text-sm">
+                        <label className="mr-3 inline-flex cursor-pointer items-center gap-1 text-red-700">
+                          <input
+                            type="checkbox"
+                            checked={court.cancel_fee}
+                            onChange={() => toggleCancelFee(court)}
+                            className="cursor-pointer accent-red-600"
+                          />
+                          취소수수료
+                        </label>
                         <button
                           onClick={() => toggleCompleted(court)}
                           className={`mr-3 hover:underline ${isDone ? 'text-blue-600' : 'text-emerald-700'}`}
@@ -303,7 +333,7 @@ export default function CourtList({ courts, isAdmin, onChanged }: Props) {
   return (
     // 좁은 화면에서는 줄바꿈 대신 머리글과 카드가 함께 가로 스크롤
     <div className="overflow-x-auto">
-      <div className={`grid gap-4 whitespace-nowrap text-[15px] ${isAdmin ? 'min-w-[920px]' : 'min-w-[720px]'}`}>
+      <div className={`grid gap-4 whitespace-nowrap text-[15px] ${isAdmin ? 'min-w-[984px]' : 'min-w-[720px]'}`}>
         <table className="w-full table-fixed text-left text-[13px] text-gray-500">
           <Columns isAdmin={isAdmin} />
           <thead>

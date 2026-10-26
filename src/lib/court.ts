@@ -9,6 +9,13 @@ export const STATUS_STYLES: Record<RecruitStatus, string> = {
   인증코트: 'bg-purple-100 text-purple-800',
 }
 
+// 취소수수료 = 이용금액 × 요율. 코트별 요율이 다르면 CANCEL_FEE_RATES에 추가 (예: 야뚜라미: 0.2)
+const DEFAULT_CANCEL_FEE_RATE = 0.1
+const CANCEL_FEE_RATES: Partial<Record<string, number>> = {}
+
+export const cancelFee = (court: Court) =>
+  Math.round(court.price * (CANCEL_FEE_RATES[court.court_name] ?? DEFAULT_CANCEL_FEE_RATE))
+
 // 완료(외부에서 확정) 일정의 코트 이름 옆 배지
 export const DONE_BADGE = 'shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-bold text-white no-underline'
 
