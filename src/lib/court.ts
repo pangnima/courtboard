@@ -20,13 +20,14 @@ export const cancelFee = (court: Court) =>
 export const DONE_BADGE = 'shrink-0 rounded-full bg-emerald-600 px-2 py-0.5 text-xs font-bold text-white no-underline'
 
 // 이 기능 도입 시점에 이미 있던 일정(40건)을 '최근 등록'에서 빼기 위한 기준 시각.
-// 2026-10-21 오후 이후에는 24시간 조건만으로 충분하므로 제거해도 된다.
+// 이미 기준 시각이 충분히 지났으므로 12시간 조건만으로 충분해 제거해도 된다.
 const RECENT_SINCE = Date.parse('2026-10-20T04:05:57Z')
-const DAY_MS = 24 * 60 * 60 * 1000
+export const RECENT_HOURS = 12
+const RECENT_MS = RECENT_HOURS * 60 * 60 * 1000
 
 export function isRecent(court: Court) {
   const created = Date.parse(court.created_at)
-  return created > RECENT_SINCE && Date.now() - created < DAY_MS
+  return created > RECENT_SINCE && Date.now() - created < RECENT_MS
 }
 
 // 종료 시간이 지난 일정 (24:00 종료는 당일 끝까지 진행 중)

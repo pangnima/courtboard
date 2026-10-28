@@ -7,6 +7,8 @@ import CancelFeeSummary from './components/CancelFeeSummary'
 import CourtForm from './components/CourtForm'
 import AdminNewCourts from './components/AdminNewCourts'
 import CourtList from './components/CourtList'
+import MuseBanner from './components/MuseBanner'
+import MuseFloatingBadge from './components/MuseFloatingBadge'
 import RecentCourts from './components/RecentCourts'
 export default function App() {
   const [courts, setCourts] = useState<Court[]>([])
@@ -59,6 +61,9 @@ export default function App() {
           <h2 className="font-semibold">코트 등록</h2>
           <CourtForm onCreated={loadCourts} />
         </section>
+
+        <MuseBanner />
+        <MuseFloatingBadge />
 
         {!loading && <RecentCourts courts={courts} />}
 

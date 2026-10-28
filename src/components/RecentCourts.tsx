@@ -1,20 +1,20 @@
-import { DONE_BADGE, hhmm, isRecent, STATUS_STYLES } from '../lib/court'
+import { DONE_BADGE, hhmm, isRecent, RECENT_HOURS, STATUS_STYLES } from '../lib/court'
 import { formatDateLabel, formatDateTime, timeAgo } from '../lib/date'
 import type { Court } from '../types'
 
-// 최근 24시간 이내 등록된 일정 (모두에게 노출, 읽기 전용)
+// 최근 12시간 이내 등록된 일정 (모두에게 노출, 읽기 전용)
 export default function RecentCourts({ courts }: { courts: Court[] }) {
   const recent = courts.filter(isRecent).sort((a, b) => b.created_at.localeCompare(a.created_at))
 
   return (
     <section className="grid gap-3 rounded-xl border border-sky-300 bg-sky-50 p-4">
       <header className="flex items-center gap-2 text-sky-900">
-        <h2 className="text-lg font-bold">최근 24시간 등록</h2>
+        <h2 className="text-lg font-bold">최근 {RECENT_HOURS}시간 등록</h2>
         <span className="ml-auto text-sm font-medium opacity-70">{recent.length}건</span>
       </header>
 
       {recent.length === 0 ? (
-        <p className="text-sm text-sky-900/70">최근 24시간 동안 등록된 일정이 없습니다.</p>
+        <p className="text-sm text-sky-900/70">최근 {RECENT_HOURS}시간 동안 등록된 일정이 없습니다.</p>
       ) : (
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {recent.map((court) => {
