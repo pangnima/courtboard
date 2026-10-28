@@ -2,7 +2,8 @@ export const RECRUIT_STATUSES = ['선착순모집', '호스트지정', '양도',
 
 export type RecruitStatus = (typeof RECRUIT_STATUSES)[number]
 
-// 등록 폼의 코트 이름 선택지. 목록에서 빠진 과거 이름도 조회되므로 court_name은 string으로 둔다
+// 등록 폼의 코트 이름 선택지. 목록에 없는 코트는 '기타'로 직접 입력하고 목록에서 빠진 과거 이름도
+// 조회되므로 court_name은 string으로 둔다. 자주 쓰는 직접 입력 이름은 여기에 추가하면 집계가 합쳐진다
 export const COURT_NAMES = [
   '목동테니스장',
   '양평누리',

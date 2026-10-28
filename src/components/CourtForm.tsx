@@ -6,11 +6,14 @@ import { COURT_NAMES, RECRUIT_STATUSES, type NewCourt, type RecruitStatus } from
 const DEFAULT_PLAY_HOURS = 2
 const LAST_END_HOUR = 24
 const START_HOURS = Array.from({ length: 17 }, (_, i) => i + 6) // 06 ~ 22시
+// 목록에 없는 코트는 '기타'를 고르고 직접 입력한 이름을 저장한다 ('기타' 자체는 저장하지 않음)
+const OTHER_COURT_NAME = '기타'
 
 const toTime = (hour: number) => `${String(hour).padStart(2, '0')}:00`
 
 const empty = {
   court_name: '',
+  court_name_other: '',
   court_number: '',
   reserver_name: '',
   recruit_status: RECRUIT_STATUSES[0] as RecruitStatus,
@@ -53,12 +56,14 @@ export default function CourtForm({ onCreated }: { onCreated: () => void }) {
     setError('')
 
     const price = Number(form.price)
+    const courtName = (form.court_name === OTHER_COURT_NAME ? form.court_name_other : form.court_name).trim()
     if (!playDate) return setError('일자(월/일)를 올바르게 입력하세요.')
     if (startHour === null || form.end_hour === '') return setError('시간을 선택하세요.')
+    if (!courtName) return setError('코트 이름을 입력하세요.')
     if (!Number.isInteger(price) || price < 0) return setError('비용은 0 이상의 정수로 입력하세요.')
 
     const court: NewCourt = {
-      court_name: form.court_name.trim(),
+      court_name: courtName,
       court_number: form.court_number.trim(),
       reserver_name: form.reserver_name.trim(),
       recruit_status: form.recruit_status,
@@ -80,7 +85,7 @@ export default function CourtForm({ onCreated }: { onCreated: () => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-4"
     >
       {/* 필드 순서는 목록 컬럼 순서와 같게 유지 */}
       <div className="grid gap-1 text-sm">
@@ -142,15 +147,28 @@ export default function CourtForm({ onCreated }: { onCreated: () => void }) {
           ))}
         </select>
       </label>
-      <label className="grid gap-1 text-sm">
+      <div className="grid gap-1 text-sm">
         코트 이름
-        <select className={inputClass} required value={form.court_name} onChange={set('court_name')}>
+        <select aria-label="코트 이름" className={inputClass} required value={form.court_name} onChange={set('court_name')}>
           <option value="">선택</option>
           {COURT_NAMES.map((name) => (
             <option key={name}>{name}</option>
           ))}
+          <option value={OTHER_COURT_NAME}>기타 (직접 입력)</option>
         </select>
-      </label>
+        {form.court_name === OTHER_COURT_NAME && (
+          <input
+            aria-label="코트 이름 직접 입력"
+            autoFocus
+            className={inputClass}
+            required
+            maxLength={50}
+            placeholder="목록에 없는 코트 이름"
+            value={form.court_name_other}
+            onChange={set('court_name_other')}
+          />
+        )}
+      </div>
       <label className="grid gap-1 text-sm">
         코트 번호
         <input className={inputClass} required maxLength={20} placeholder="예: 3번" value={form.court_number} onChange={set('court_number')} />
