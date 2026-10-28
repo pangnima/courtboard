@@ -1,8 +1,8 @@
 import confetti from 'canvas-confetti'
 
-// 뮤즈 라켓 획득 축하 꽃가루 (움직임 줄이기 설정이면 생략)
+// 뮤즈 라켓 획득 축하 꽃가루 (OS의 움직임 줄이기 설정과 관계없이 항상 재생)
 const COLORS = ['#c7d2fe', '#bae6fd', '#e2e8f0', '#ffffff', '#facc15']
-const common = { colors: COLORS, disableForReducedMotion: true }
+const common = { colors: COLORS }
 
 const toOrigin = (x: number, y: number) => ({ x: x / window.innerWidth, y: y / window.innerHeight })
 

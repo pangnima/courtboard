@@ -54,7 +54,7 @@ export default function MuseBanner() {
         height={408}
         className="h-auto w-full"
       />
-      <span className="pointer-events-none absolute inset-y-0 left-0 hidden w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent motion-safe:block motion-safe:animate-shine" />
+      <span className="pointer-events-none absolute inset-y-0 left-0 w-1/3 animate-shine bg-gradient-to-r from-transparent via-white/50 to-transparent" />
     </button>
   )
 }
